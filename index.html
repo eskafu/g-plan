@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GUANO · AI Studio</title>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --card: #161616;
+    --border: #2a2a2a;
+    --text: #d4d4d4;
+    --dim: #777;
+    --accent: #e6a817;
+    --badge-ok: #1a7a2e;
+    --badge-wip: #8a6d0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LOCK SCREEN ── */
+  .lock-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    transition: opacity 0.4s, visibility 0.4s;
+  }
+  .lock-screen.hidden {
+    opacity: 0; visibility: hidden; pointer-events: none;
+  }
+  .lock-logo {
+    font-size: 36px; font-weight: 200; letter-spacing: 6px;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .lock-logo span { color: var(--accent); font-weight: 400; }
+  .lock-sub { font-size: 11px; color: var(--dim); letter-spacing: 2px; margin-bottom: 32px; text-transform: uppercase; }
+  .lock-input {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 16px; padding: 12px 18px;
+    border-radius: 6px; width: 240px; text-align: center;
+    outline: none; transition: border-color 0.2s;
+    letter-spacing: 2px;
+  }
+  .lock-input:focus { border-color: var(--accent); }
+  .lock-shake { animation: shake 0.4s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .lock-error { font-size: 11px; color: #c0392b; margin-top: 10px; height: 16px; }
+
+  /* ── MAIN CONTENT ── */
+  .main { max-width: 600px; margin: 0 auto; padding: 24px 16px 40px; }
+  header { padding: 16px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  header h1 { font-size: 22px; font-weight: 200; letter-spacing: 2px; }
+  header h1 span { color: var(--accent); font-weight: 400; }
+  header .sub { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+  .section-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--dim); margin: 24px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  /* ── PROJECT CARDS ── */
+  .project-card {
+    display: block; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; margin-bottom: 10px;
+    text-decoration: none; color: var(--text);
+    transition: border-color 0.2s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .project-card:active { transform: scale(0.985); border-color: var(--accent); }
+  .project-card:hover { border-color: #444; }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .card-title { font-size: 15px; font-weight: 500; }
+  .badge {
+    font-size: 9px; padding: 3px 8px; border-radius: 12px;
+    font-weight: 500; letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .badge-prod { background: var(--badge-wip); color: #ffeaa7; }
+  .badge-done { background: var(--badge-ok); color: #a8f0b8; }
+  .card-meta { font-size: 10px; color: var(--dim); display: flex; gap: 12px; }
+  .card-desc { font-size: 11px; color: #aaa; margin-top: 6px; line-height: 1.4; }
+  .card-arrow { float: right; color: var(--dim); font-size: 14px; margin-top: -2px; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 40px 20px; color: var(--dim); font-size: 12px; }
+  .empty .icon { font-size: 32px; margin-bottom: 10px; }
+
+  /* ── LOGOUT ── */
+  .logout-btn {
+    position: fixed; bottom: 16px; right: 16px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--dim); font-size: 11px; padding: 8px 14px;
+    border-radius: 20px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+</style>
+</head>
+<body>
+
+<div class="lock-screen" id="lockscreen">
+  <div class="lock-logo">GUAN<span>O</span></div>
+  <div class="lock-sub">AI Studio · Planeamentos</div>
+  <input type="password" class="lock-input" id="pwinput" placeholder="••••••••" autofocus autocomplete="off">
+  <div class="lock-error" id="lckerr"></div>
+</div>
+
+<div class="main" id="main" style="display:none">
+  <header>
+    <h1>GUAN<span>O</span></h1>
+    <div class="sub">AI Studio · Planeamentos de Vídeo</div>
+  </header>
+
+  <div class="section-title">📋 Em Produção</div>
+  <div id="active-projects"></div>
+
+  <div class="section-title">📦 Arquivo</div>
+  <div id="archive-projects"></div>
+  <div class="empty" id="empty-state" style="display:none">
+    <div class="icon">🎬</div>
+    Nenhum projeto ainda.<br>Em breve.
+  </div>
+
+  <button class="logout-btn" onclick="logout()">🚪 Sair</button>
+</div>
+
+<script>
+const EXPECTED_HASH = '4bc7855012ab13654b040b0132458481c3adc356dc8fcbecd0c0c35acbfe4486';
+const AUTH_KEY = 'guano_auth';
+
+// ── PROJECTS DATABASE ──
+const PROJECTS = [
+  {
+    id: 'sorio-28junho',
+    name: 'So Rio — Plano de Filmagens',
+    date: '28 Junho 2026',
+    location: 'Valada do Ribatejo',
+    desc: 'Captação de biblioteca. Drone + Gimbal. Pagode do Elias.',
+    status: 'prod', // 'prod' | 'done'
+    path: 'sorio-28junho/'
+  }
+];
+
+// ── AUTH ──
+async function checkPw(input) {
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+const lockScreen = document.getElementById('lockscreen');
+const pwInput = document.getElementById('pwinput');
+const lckErr = document.getElementById('lckerr');
+const mainEl = document.getElementById('main');
+
+pwInput.addEventListener('keydown', async (e) => {
+  if (e.key !== 'Enter') { lckErr.textContent = ''; return; }
+  const hash = await checkPw(pwInput.value);
+  if (hash === EXPECTED_HASH) {
+    sessionStorage.setItem(AUTH_KEY, '1');
+    lockScreen.classList.add('hidden');
+    mainEl.style.display = 'block';
+    renderProjects();
+  } else {
+    lckErr.textContent = 'Password errada';
+    pwInput.classList.add('lock-shake');
+    setTimeout(() => pwInput.classList.remove('lock-shake'), 400);
+    pwInput.select();
+  }
+});
+
+// Check if already authed
+if (sessionStorage.getItem(AUTH_KEY) === '1') {
+  lockScreen.classList.add('hidden');
+  mainEl.style.display = 'block';
+  renderProjects();
+}
+
+function logout() {
+  sessionStorage.removeItem(AUTH_KEY);
+  location.reload();
+}
+
+// ── RENDER ──
+function renderProjects() {
+  const active = document.getElementById('active-projects');
+  const archive = document.getElementById('archive-projects');
+  const empty = document.getElementById('empty-state');
+
+  const prod = PROJECTS.filter(p => p.status === 'prod');
+  const done = PROJECTS.filter(p => p.status === 'done');
+
+  active.innerHTML = prod.map(p => cardHTML(p)).join('') || '<div class="empty"><div class="icon">—</div>Nenhum projeto ativo</div>';
+  archive.innerHTML = done.map(p => cardHTML(p)).join('') || '';
+
+  if (PROJECTS.length === 0) empty.style.display = 'block';
+}
+
+function cardHTML(p) {
+  const badge = p.status === 'prod'
+    ? '<span class="badge badge-prod">EM PRODUÇÃO</span>'
+    : '<span class="badge badge-done">CONCLUÍDO</span>';
+  return `
+    <a href="${p.path}" class="project-card">
+      <div class="card-header">
+        <div class="card-title">${p.name}</div>
+        ${badge}
+      </div>
+      <div class="card-meta">
+        <span>📅 ${p.date}</span>
+        <span>📍 ${p.location}</span>
+      </div>
+      <div class="card-desc">${p.desc} <span class="card-arrow">→</span></div>
+    </a>`;
+}
+</script>
+
+</body>
+</html>
