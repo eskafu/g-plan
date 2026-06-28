@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>So Rio — Folha AD · 28 Junho</title>
+<style>
+  @page { size: A4 landscape; margin: 6mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 8pt; background: #e8e8e8; padding: 20px; }
+
+  .sheet {
+    width: 277mm; min-height: 190mm;
+    margin: 0 auto 10px;
+    background: #fff;
+    padding: 7mm 8mm;
+    page-break-after: always;
+  }
+
+  /* ── HEADER ── */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3mm; }
+  .header h1 { font-size: 14pt; font-weight: 700; letter-spacing: -0.3px; }
+  .header .sub { font-size: 8pt; color: #555; }
+  .header .meta { text-align: right; font-size: 7pt; line-height: 1.6; color: #444; }
+
+  /* ── INFO BOXES ── */
+  .info-row { display: flex; gap: 3mm; margin-bottom: 3mm; }
+  .info-box {
+    flex: 1; border: 0.5px solid #999; padding: 2mm 3mm;
+    font-size: 7pt; line-height: 1.55;
+  }
+  .info-box h3 {
+    font-size: 7pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.4px; margin-bottom: 1mm; color: #222;
+    border-bottom: 0.5px solid #ccc; padding-bottom: 0.5mm;
+  }
+  .info-box table { width: 100%; border-collapse: collapse; }
+  .info-box td { padding: 0.3mm 1mm; vertical-align: top; }
+  .info-box td:first-child { color: #555; width: 40%; }
+  .info-box .warn { color: #c0392b; font-weight: 600; }
+
+  /* ── TIMELINE BAR ── */
+  .timeline {
+    display: flex; height: 9mm; border-radius: 2px; overflow: hidden;
+    font-size: 6.5pt; font-weight: 600; text-align: center; margin-bottom: 3mm;
+  }
+  .timeline div {
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; padding: 0 1mm;
+  }
+  .tl-naut  { background: #2980b9; }
+  .tl-bar    { background: #e67e22; }
+  .tl-pessoas { background: #16a085; }
+  .tl-pagode { background: #8e44ad; flex: 3; }
+  .tl-pickup { background: #27ae60; }
+
+  .luz-note { background: #fef9e7; border-left: 3px solid #f39c12; padding: 1.5mm 2.5mm; font-size: 6.8pt; margin-bottom: 3mm; }
+
+  /* ── MAIN TABLE ── */
+  table.main {
+    width: 100%; border-collapse: collapse; font-size: 6.8pt;
+  }
+  table.main thead th {
+    background: #2c3e50; color: #fff; font-weight: 600; font-size: 6.3pt;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    padding: 1.2mm 1mm; border: 0.3px solid #2c3e50;
+    text-align: left; white-space: nowrap;
+  }
+  table.main tbody td {
+    padding: 0.9mm 1mm; border: 0.3px solid #ccc;
+    vertical-align: top; line-height: 1.4;
+  }
+  table.main .block-header td {
+    background: #eef1f5; font-weight: 700; font-size: 7pt;
+    text-transform: uppercase; letter-spacing: 0.3px; color: #2c3e50;
+    padding: 2mm 3mm; border-bottom: 1px solid #999;
+  }
+  table.main .chk { width: 4%; text-align: center; }
+  table.main .eq { width: 10%; }
+  table.main .hora { width: 6%; }
+  table.main .shot { width: 4%; font-weight: 600; }
+  table.main .amb { width: 7%; }
+  table.main .notas { width: 13%; }
+
+  tbody tr:hover td { background: #fafafa; }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 3mm; font-size: 6.5pt; color: #888;
+    border-top: 0.5px solid #ccc; padding-top: 2mm;
+    display: flex; justify-content: space-between;
+  }
+
+  /* ── PAGE 2 ── */
+  .p2-grid { display: flex; gap: 4mm; flex: 1; }
+  .p2-col { flex: 1; display: flex; flex-direction: column; gap: 3mm; }
+  .card {
+    border: 0.5px solid #999; padding: 2.5mm 3.5mm;
+    font-size: 7.2pt; line-height: 1.55;
+  }
+  .card h3 {
+    font-size: 7.5pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.4px; margin-bottom: 1.5mm; color: #222;
+    border-bottom: 0.5px solid #ccc; padding-bottom: 0.5mm;
+  }
+  .card ul { padding-left: 3.5mm; margin-bottom: 0; }
+  .card li { margin-bottom: 1mm; }
+  .card .alert { color: #c0392b; font-weight: 600; }
+  .card table { width: 100%; border-collapse: collapse; margin-top: 0.5mm; }
+  .card td { padding: 0.6mm 1mm; border-bottom: 0.2px solid #eee; }
+  .card td:first-child { font-weight: 600; width: 48%; }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .sheet { box-shadow: none; margin: 0; page-break-after: always; }
+    .no-print { display: none !important; }
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    position: fixed; top: 10px; right: 14px; z-index: 10;
+    display: flex; gap: 5px;
+  }
+  .toolbar button {
+    font-size: 9pt; padding: 5px 12px; border: 1px solid #999;
+    border-radius: 4px; background: #fff; cursor: pointer;
+    font-family: inherit;
+  }
+  .toolbar button:hover { background: #eee; }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <button onclick="window.print()">🖨️ Imprimir</button>
+  <button onclick="saveHTML()">💾 Guardar cópia</button>
+</div>
+
+<!-- ═══════════════ PAGE 1 ═══════════════ -->
+<div class="sheet">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <h1>SORIO — PLANO DE FILMAGENS</h1>
+      <div class="sub">Captação de biblioteca · Promos & Stories · ATIVIDADES NÁUTICAS</div>
+    </div>
+    <div class="meta" contenteditable="true">
+      28 JUNHO 2026 · SÁBADO<br>
+      Dir: Tiago Guano<br>
+      Contacto: Luís (So Rio)<br>
+      INÍCIO: 13h00
+    </div>
+  </div>
+
+  <!-- INFO ROW -->
+  <div class="info-row">
+    <div class="info-box">
+      <h3>🌍 Localização</h3>
+      <table contenteditable="true">
+        <tr><td>Morada</td><td>So Rio · Valada do Ribatejo</td></tr>
+        <tr><td>Coords</td><td>39.083, -8.767 (Santarém)</td></tr>
+        <tr><td>Acesso água</td><td>Rampa praia fluvial</td></tr>
+      </table>
+    </div>
+    <div class="info-box">
+      <h3>☀️ Luz & Meteo</h3>
+      <table contenteditable="true">
+        <tr><td>Nascer / Pôr</td><td>06h10 / 21h04</td></tr>
+        <tr><td>Golden hour</td><td class="warn">~20h30 — FORA da janela</td></tr>
+        <tr><td>Luz shoot</td><td>Sol pleno · 28–32°C · luz dura</td></tr>
+        <tr><td>Sombra</td><td>Maioria esplanada sob árvores ✅</td></tr>
+        <tr><td>Vento</td><td class="warn">Monitorar — vale do Tejo + atividades água</td></tr>
+      </table>
+    </div>
+    <div class="info-box">
+      <h3>🎒 Equipamento</h3>
+      <table contenteditable="true">
+        <tr><td>Drone</td><td>Mavic 4 Pro · 3 bat · ND</td></tr>
+        <tr><td>Gimbal</td><td>Sony A7 + 16-36mm GM</td></tr>
+        <tr><td>Ação / Água</td><td>GoPro / DJI Action — à prova d'água</td></tr>
+        <tr><td>Cartões</td><td>SD formatados</td></tr>
+        <tr><td>Extra</td><td>Power bank · Água · Pano · Toalha</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline">
+    <div class="tl-naut" style="flex:2">🛶 13:00<br>NAUTICAS</div>
+    <div class="tl-bar" style="flex:1.5">🍸 14:30<br>BAR</div>
+    <div class="tl-pessoas" style="flex:1.5">👥 15:30<br>PESSOAS</div>
+    <div class="tl-pagode" style="flex:4">🎵 16:00 – 17:30 · PAGODE DO ELIAS</div>
+    <div class="tl-pickup" style="flex:1.5">🔄 17:30<br>PICKUPS</div>
+  </div>
+
+  <div class="luz-note" contenteditable="true">
+    ⚠️ <strong>NOVO INSUFLÁVEL em destaque.</strong> Começar 13h para aproveitar luz forte na água = cores vibrantes. Água em luz dura funciona para planos de ação e alegria. Sombra árvores = luz difusa para close-ups de pessoas.
+  </div>
+
+  <!-- MAIN TABLE -->
+  <table class="main" contenteditable="true">
+    <thead>
+      <tr>
+        <th class="chk">✓</th>
+        <th class="hora">Hora</th>
+        <th class="shot">#</th>
+        <th class="eq">Equip</th>
+        <th>Plano / Descrição</th>
+        <th class="amb">Amb</th>
+        <th class="notas">Notas</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- BLOCK 1: ATIVIDADES NÁUTICAS -->
+      <tr class="block-header"><td colspan="7">🛶 BLOCO 1 — ATIVIDADES NÁUTICAS · 13:00–14:30 (90 min)</td></tr>
+      <tr><td class="chk">☐</td><td>13:00</td><td>N1</td><td>🚁 Drone</td><td>Wide aéreo: rio, zona náutica, esplanada — establishing geral</td><td>EXT/DIA</td><td>1ª bat</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N2</td><td>🚁 Drone</td><td>Top-down: paddleboards, insuflável, canoes — layout atividades</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N3</td><td>🎥 Gimbal</td><td>Insuflável NOVO: crianças/adultos a saltar, cair na água</td><td>EXT/DIA</td><td>🔑 PRIORIDADE — close action</td></tr>
+      <tr><td class="chk">☐</td><td>13:30</td><td>N4</td><td>🎥 Gimbal 60fps</td><td>Slow-mo: salto do insuflável → entrada na água — explosão</td><td>EXT/DIA</td><td>Abaixo da água se possível</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N5</td><td>🎥 Gimbal</td><td>Paddleboard: pessoas em pé, remar, equilíbrio</td><td>EXT/DIA</td><td>Dinâmica + água a espirrar</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N6</td><td>🎥 Gimbal</td><td>Canoa/kayak: tracking rente à água, movimento fluído</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N7</td><td>📷 Ação</td><td>POV na água: salto, submersão, superfície</td><td>EXT/DIA</td><td>GoPro à prova d'água</td></tr>
+      <tr><td class="chk">☐</td><td>14:00</td><td>N8</td><td>🎥 Gimbal</td><td>Famílias/grupos a preparar-se: coletes, pranchas, alegria</td><td>EXT/DIA</td><td>Emoção + interação</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N9</td><td>🚁 Drone</td><td>Órbita zona náutica: insuflável + paddle + rio em plano</td><td>EXT/DIA</td><td>2ª bat</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>N10</td><td>🎥 Gimbal</td><td>Detalhes: coletes, cordas, toldos, pés na água</td><td>EXT/DIA</td><td></td></tr>
+
+      <!-- BLOCK 2: BAR -->
+      <tr class="block-header"><td colspan="7">🍸 BLOCO 2 — BAR & COCKTAILS · 14:30–15:30 (60 min)</td></tr>
+      <tr><td class="chk">☐</td><td>14:30</td><td>B1</td><td>🎥 Gimbal 60fps</td><td>Slow-mo: mãos a preparar cocktail — gelo, shaker, verter</td><td>INT/DIA</td><td>Coordenar bartender</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>B2</td><td>🎥 Gimbal</td><td>Wide bar: esplanada meio-dia, gente a chegar</td><td>INT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>B3</td><td>🎥 Gimbal</td><td>Close-up copo: cocktail pronto, fundo rio desfocado</td><td>INT/DIA</td><td>Fundo rio = diff</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>B4</td><td>🎥 Gimbal</td><td>Slide lateral: fileira cocktails no balcão</td><td>INT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>B5</td><td>🎥 Gimbal</td><td>Ambiente bar: balcão, garrafas, bartender em ação</td><td>INT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>B6</td><td>🎥 Gimbal</td><td>Detalhe ingredientes: fruta, ervas, gelo, copos</td><td>INT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td>15:10</td><td>B7</td><td>🎥 Gimbal</td><td>Brinde: 2+ copos, câmara baixa, contraluz rio</td><td>INT/DIA</td><td>Provocar</td></tr>
+
+      <!-- BLOCK 3: PESSOAS -->
+      <tr class="block-header"><td colspan="7">👥 BLOCO 3 — PESSOAS & ESPÍRITO · 15:30–16:00 (30 min)</td></tr>
+      <tr><td class="chk">☐</td><td>15:30</td><td>E1</td><td>🎥 Gimbal</td><td>Esplanada em movimento: gente a rir, conversar, relaxar</td><td>EXT/DIA</td><td>Fotogénico, sol+árvores</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>E2</td><td>🎥 Gimbal</td><td>Grupos à mesa: brindes espontâneos, reações naturais</td><td>EXT/DIA</td><td>🔑 Prioridade — verdade</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>E3</td><td>🎥 Gimbal</td><td>Close-up rostos: expressões de sol, calor, descontração</td><td>EXT/DIA</td><td>Luz árvore = bonita</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>E4</td><td>🎥 Gimbal</td><td>Caminho rio → esplanada: tracking pessoas a chegar</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td>15:45</td><td>E5</td><td>🎥 Gimbal</td><td>Pessoas na água (pés, sentadas beira-rio): refresco</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>E6</td><td>🎥 Gimbal</td><td>Plano "assinatura" SORIO: rio + esplanada + gente em 1 plano</td><td>EXT/DIA</td><td></td></tr>
+
+      <!-- BLOCK 4: PAGODE -->
+      <tr class="block-header"><td colspan="7">🎵 BLOCO 4 — PAGODE DO ELIAS · 16:00–17:30 (90 min)</td></tr>
+      <tr><td class="chk">☐</td><td>16:00</td><td>P1</td><td>🎥 Gimbal</td><td>Wide: roda de samba + músicos + público</td><td>EXT/DIA</td><td>Áudio 30s ref</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>P2</td><td>🎥 Gimbal</td><td>Detalhe instrumentos: mãos na viola, pandeiro, cavaquinho</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>P3</td><td>🎥 Gimbal</td><td>Close-up músicos: rostos, expressões a tocar</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td>16:45</td><td>P4</td><td>🎥 Gimbal</td><td>Público a curtir: pessoas a cantar, sorrir, dançar</td><td>EXT/DIA</td><td>🔑 Prioridade</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>P5</td><td>🎥 Gimbal</td><td>Brindes espontâneos: grupos a brindar c/ cocktails</td><td>EXT/DIA</td><td>Provocar</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>P6</td><td>🎥 Gimbal</td><td>Tracking lateral: esplanada viva — rio + evento + gente</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td>17:15</td><td>P7</td><td>🚁 Drone</td><td>Órbita alta esplanada + rio (se zona segura)</td><td>EXT/DIA</td><td>Só se OK</td></tr>
+
+      <!-- BLOCK 5: PICKUPS -->
+      <tr class="block-header"><td colspan="7">🔄 BLOCO 5 — PICKUPS FINAIS · 17:30–18:00 (30 min)</td></tr>
+      <tr><td class="chk">☐</td><td>17:30</td><td>F1</td><td>🚁 Drone</td><td>Repetir N1/N2 — zona náutica agora com mais gente</td><td>EXT/DIA</td><td>3ª bat</td></tr>
+      <tr><td class="chk">☐</td><td></td><td>F2</td><td>🎥 Gimbal</td><td>Cocktails à luz do fim de tarde: copos dourados</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>F3</td><td>🎥 Gimbal</td><td>Entrada/saída: movimento natural de pessoas</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td></td><td>F4</td><td>🎥 Gimbal</td><td>Staff em ação: bartender, empregados, coordenador atividades</td><td>EXT/DIA</td><td></td></tr>
+      <tr><td class="chk">☐</td><td>17:50</td><td>F5</td><td>🎥 Gimbal</td><td>Wide final: rio + esplanada loteada — "esta é a vibe"</td><td>EXT/DIA</td><td></td></tr>
+
+    </tbody>
+  </table>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>SORIO · 28 JUNHO 2026</span>
+    <span>39 planos · 5 blocos · 5 horas</span>
+    <span>Tiago Guano — GUANO</span>
+  </div>
+
+</div><!-- /page 1 -->
+
+<!-- ═══════════════ PAGE 2 ═══════════════ -->
+<div class="sheet">
+
+  <div class="header">
+    <div>
+      <h1>SORIO — CHECKLISTS & PLANO B</h1>
+      <div class="sub">Operacional de set · 28 Junho 2026</div>
+    </div>
+    <div class="meta" contenteditable="true">
+      Chegada: 12h50<br>
+      Fim: 18h00<br>
+      Cartão: SO_RIO_20260628
+    </div>
+  </div>
+
+  <div class="p2-grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="p2-col">
+
+      <div class="card">
+        <h3>📋 Pré-arranque (12:50)</h3>
+        <ul contenteditable="true">
+          <li>Falar c/ responsável (Luís?) — confirmar timing Pagode</li>
+          <li>Confirmar <strong>insuflável NOVO</strong> disponível e seguro</li>
+          <li>Confirmar bartender + chef disponíveis blocos 2</li>
+          <li>Montar drone, verificar vento, avaliar zona de voo</li>
+          <li>Gimbal pronto, cartão formatado, ISO definido</li>
+          <li>Verificar ND filters (sol no rio = reflexos)</li>
+          <li>Equipamento à prova d'água (GoPro/Action) carregado e testado</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>🗂️ Pastas Cartão SD</h3>
+        <table contenteditable="true">
+          <tr><td>01_NAUTICAS/</td><td>N1–N10 + F1</td></tr>
+          <tr><td>02_BAR/</td><td>B1–B7</td></tr>
+          <tr><td>03_PESSOAS/</td><td>E1–E6</td></tr>
+          <tr><td>04_PAGODE/</td><td>P1–P7</td></tr>
+          <tr><td>05_PICKUPS/</td><td>F2–F5</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>🔑 Frases de Set</h3>
+        <ul contenteditable="true">
+          <li>"Bora saltar do insuflável!" (provocar ação)</li>
+          <li>"Fazem um brinde à roda de samba?"</li>
+          <li>"Podes verter o cocktail mais devagar?"</li>
+          <li>"Corta essa pizza agora para eu filmar?"</li>
+          <li>"Posso filmar aqui 30 segundos?"</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="p2-col">
+
+      <div class="card">
+        <h3>⚠️ Prioridades Absolutas</h3>
+        <table contenteditable="true">
+          <tr class="alert"><td>1</td><td><strong>Insuflável NOVO — ação, salto, água</strong></td></tr>
+          <tr class="alert"><td>2</td><td>Pessoas a curtir: emoção real, risos, brindes</td></tr>
+          <tr class="alert"><td>3</td><td>Pagode: público a curtir + brindes</td></tr>
+          <tr class="alert"><td>4</td><td>Cocktails bonitos em slow-mo</td></tr>
+          <tr><td>5</td><td>Drone final c/ esplanada cheia</td></tr>
+          <tr><td>6</td><td>Detalhes ambiente (mesas, staff, entrada)</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>🎯 Plano B</h3>
+        <table contenteditable="true">
+          <tr><td>Chuva / vento</td><td>Anular drone → interior: bar, cozinha, close-ups</td></tr>
+          <tr><td>Insuflável indisp.</td><td>Focar paddle/canoes + pessoas na água</td></tr>
+          <tr><td>Pagode atrasado</td><td>Ficar bar/pessoas até arrancar</td></tr>
+          <tr><td>Bartender ocupado</td><td>2 cocktails bonitos > 10 normais</td></tr>
+          <tr><td>Bat drone esgotada</td><td>Gimbal faz o resto — drone é bónus</td></tr>
+          <tr><td>Vento forte</td><td>Drone só hover ou cancelar; água com Gimbal</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>📝 Lembretes</h3>
+        <ul contenteditable="true">
+          <li>Gravar <strong>5s extra</strong> início e fim de cada take</li>
+          <li>Áudio ambiente: 30–60s por bloco</li>
+          <li>Sombra árvores = luz difusa ✅</li>
+          <li>ND drone sempre (Tejo = reflexos)</li>
+          <li>Energia > perfeição técnica</li>
+          <li class="alert">⚠️ Vento vale Tejo — avaliar cada voo</li>
+          <li class="alert">⚠️ Equip. água: testar ANTES de filmar no rio</li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span>SORIO · 28 JUNHO 2026</span>
+    <span>39 planos · 5 blocos · 5 horas</span>
+    <span>Tiago Guano — GUANO</span>
+  </div>
+
+</div><!-- /page 2 -->
+
+<script>
+function saveHTML() {
+  const sheets = document.querySelectorAll('.sheet');
+  let html = '<!DOCTYPE html>\n<html lang="pt">\n<head>\n<meta charset="UTF-8">\n';
+  html += '<title>So Rio — Folha AD · 28 Junho 2026</title>\n';
+  html += document.querySelector('style').outerHTML + '\n</head>\n<body>\n';
+  sheets.forEach(s => {
+    html += s.outerHTML + '\n';
+  });
+  html += '</body>\n</html>';
+  const blob = new Blob([html], {type: 'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'SORIO_FOLHA_AD_28JUNHO.html';
+  a.click();
+}
+</script>
+
+</body>
+</html>
