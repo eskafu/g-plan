@@ -53,7 +53,7 @@
 <p class="note">Fonte: Milanote DRONE BRIEF + email Our Crew. Horários críticos devem ser confirmados na app/briefing do dia.</p>
 </div>
 <script>
-const HASH='4bc7855012ab13654b040b0132458481c3adc356dc8fcbecd0c0c35acbfe4486';
+const HASH='77f17a78bb8b53ebd72071fac5ecccca6c0ea9f101db51795eab7b68ecd3a45e';
 async function sha256(m){const e=new TextEncoder().encode(m);const h=await crypto.subtle.digest('SHA-256',e);return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 const lock=document.getElementById('lockscreen'), main=document.getElementById('main'), input=document.getElementById('pwinput'), err=document.getElementById('lckerr');
 input.addEventListener('keydown',async e=>{if(e.key!=='Enter')return;if(await sha256(input.value)===HASH){sessionStorage.setItem('auth-g','1');unlock()}else{err.textContent='Password incorreta';input.value='';lock.classList.add('lock-shake');setTimeout(()=>lock.classList.remove('lock-shake'),450)}});
