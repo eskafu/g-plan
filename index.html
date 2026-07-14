@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>G-OS</title>
+<title>g-plan</title>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -12,7 +12,6 @@
     --text: #b0b0b0;
     --dim: #555;
     --amber: #c88a2e;
-    --accent: #3b7fd4;
   }
   * { margin:0; padding:0; box-sizing:border-box }
   body {
@@ -21,33 +20,6 @@
     font-family: 'Segoe UI', system-ui, sans-serif;
     min-height: 100vh;
   }
-  #login-overlay {
-    position: fixed; inset:0; z-index:9999;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-  }
-  #login-overlay.hidden { display: none }
-  .login-box {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 2.5rem 2rem;
-    width: 340px; max-width: 90vw; text-align: center;
-  }
-  .login-box h1 {
-    font-weight: 300; font-size: 1.4rem; color:#e0e0e0; margin-bottom:.2rem;
-    letter-spacing: .04em;
-  }
-  .login-box h1 span { color: var(--amber); font-weight: 500 }
-  .login-box .sub { font-size:.75rem; color:var(--dim); margin-bottom:1.5rem }
-  .login-box input[type=password] {
-    width:100%; padding:.65rem .9rem;
-    background: #0a0a0a; border:1px solid var(--border); border-radius:5px;
-    color: #e0e0e0; font-size: 1rem; outline:none; text-align: center;
-    letter-spacing: .08em;
-  }
-  .login-box input:focus { border-color: var(--amber) }
-  .login-box .error { color: #b44; font-size: .75rem; margin-top:.5rem; min-height:1.2em }
-
-  #main-content.hidden { display: none }
   .app { max-width: 800px; margin:0 auto; padding:3rem 1.5rem }
   header {
     text-align: center; margin-bottom: 3rem;
@@ -70,105 +42,34 @@
   .project-card h3 { font-weight: 500; font-size: 1.05rem; color:#d0d0d0 }
   .project-card .desc { font-size: .78rem; color: var(--dim); margin-top:.2rem }
   .project-card .arrow { color: var(--dim); font-size: 1.2rem }
-  .empty { text-align: center; color: var(--dim); padding: 3rem; font-style: italic }
+  .back-link { text-align: center; margin-top: 2rem }
+  .back-link a { color: var(--amber); text-decoration: none; font-size: .85rem }
+  .back-link a:hover { text-decoration: underline }
   footer { text-align: center; color: #2a2a2a; font-size:.7rem; margin-top:3rem }
-
-  .project-group { display: flex; flex-direction: column; }
-  .project-group-header { cursor: pointer; user-select: none; }
-  .project-group-header .arrow { transition: transform .2s; }
-  .project-group-header.open .arrow { transform: rotate(90deg); }
-  .sub-projects { display: none; flex-direction: column; gap: .5rem; padding: .3rem 0 .3rem 1.2rem; }
-  .sub-projects.open { display: flex; }
-  .sub-card { font-size: .92rem; padding: .8rem 1.2rem; }
-  .sub-card h3 { font-size: .95rem; }
 </style>
 </head>
 <body>
-
-<div id="login-overlay">
-  <div class="login-box">
-    <h1>G-<span>PLAN</span></h1>
-    <div class="sub">Acesso restrito</div>
-    <input type="password" id="pw" placeholder="Password" autofocus>
-    <div class="error" id="err"></div>
-  </div>
+<div class="app">
+  <header>
+    <h2>g-<span>plan</span></h2>
+    <p>Produção · datasheets · assistência de direção</p>
+  </header>
+  <div class="project-list" id="projects"></div>
+  <div class="back-link"><a href="../">← G-OS</a></div>
+  <footer>g-plan · <span id="ts"></span></footer>
 </div>
-
-<div id="main-content" class="hidden">
-  <div class="app">
-    <header>
-      <h2>G-<span>OS</span></h2>
-      <p>Hub · projetos · ferramentas</p>
-    </header>
-    <div class="project-list" id="projects">
-      <div class="empty">Nenhum projeto ainda</div>
-    </div>
-    <footer>G-OS · <span id="ts"></span></footer>
-  </div>
-</div>
-
 <script>
-  const HASH = 'f5ea8328fe243c4688128d48b0616e6eb756ed5afb4f27494402f649c0115773';
   const PROJECTS = [
-    {
-      name: 'g-plan',
-      desc: 'Produção · datasheets · assistência de direção',
-      children: [
-        { name: 'ANP26 Drone Brief', desc: 'Afro Nation Portugal 2026 · plano completo drone/FPV · Spotify full coverage · schedules', path: 'anp26-drone/' },
-        { name: 'So Rio', desc: 'Plano de filmagens · Náuticas, Bar, Pessoas, Pagode · EM PRODUÇÃO 📅 28 Junho 2026', path: 'so-rio/' },
-        { name: 'Homem na Paragem', desc: 'Curta-metragem AI · drama urbano noturno', path: 'homem-na-paragem/' },
-      ]
-    },
-    { name: 'Pop Box Customiser', desc: '🎨 Cria caixas Funko Pop personalizadas · upload, crop, cores, download', path: 'pop-box/' },
-    { name: 'Zombie FPS', desc: '🧟 Jogo de sobrevivência · first-person shooter · zombies no browser', path: '../zombie-fps/' },
+    { name: 'ANP26 Drone Brief', desc: 'Afro Nation Portugal 2026 · plano drone/FPV · Spotify · schedules', path: 'anp26-drone/' },
+    { name: 'So Rio', desc: 'Plano de filmagens · Náuticas, Bar, Pessoas, Pagode · EM PRODUÇÃO 📅 28 Junho 2026', path: 'so-rio/' },
+    { name: 'Homem na Paragem', desc: 'Curta-metragem AI · drama urbano noturno', path: 'homem-na-paragem/' },
   ];
-
-  async function sha256(m) {
-    const e = new TextEncoder().encode(m);
-    const h = await crypto.subtle.digest('SHA-256', e);
-    return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
-
-  const overlay = document.getElementById('login-overlay');
-  const main = document.getElementById('main-content');
-  const pw = document.getElementById('pw');
-  const err = document.getElementById('err');
-
-  if (sessionStorage.getItem('auth-g') === '1') unlock();
-
-  pw.addEventListener('keydown', async (e) => {
-    if (e.key !== 'Enter') return;
-    if (await sha256(pw.value) === HASH) {
-      sessionStorage.setItem('auth-g', '1');
-      unlock();
-    } else { err.textContent = 'Password incorreta'; pw.value = ''; }
-  });
-
-  function unlock() {
-    overlay.classList.add('hidden');
-    main.classList.remove('hidden');
-    document.getElementById('ts').textContent = new Date().toISOString().slice(0,10);
-    const list = document.getElementById('projects');
-    list.innerHTML = PROJECTS.map(p => {
-      if (p.children) {
-        const subs = p.children.map(c =>
-          `<a class="project-card sub-card" href="${c.path}">
-            <div><h3>${c.name}</h3><div class="desc">${c.desc}</div></div>
-            <div class="arrow">→</div></a>`
-        ).join('');
-        return `<div class="project-group">
-          <div class="project-card project-group-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-            <div><h3>${p.name}</h3><div class="desc">${p.desc}</div></div>
-            <div class="arrow">▸</div>
-          </div>
-          <div class="sub-projects">${subs}</div>
-        </div>`;
-      }
-      return `<a class="project-card" href="${p.path}">
-        <div><h3>${p.name}</h3><div class="desc">${p.desc}</div></div>
-        <div class="arrow">→</div></a>`;
-    }).join('');
-  }
+  document.getElementById('ts').textContent = new Date().toISOString().slice(0,10);
+  document.getElementById('projects').innerHTML = PROJECTS.map(p =>
+    `<a class="project-card" href="${p.path}">
+      <div><h3>${p.name}</h3><div class="desc">${p.desc}</div></div>
+      <div class="arrow">→</div></a>`
+  ).join('');
 </script>
 </body>
 </html>
