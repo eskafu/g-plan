@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Pop Box — Personalisation</title>
+<style>
+  @font-face {
+    font-family: 'Bebas Neue';
+    src: url('bebas_neue/BebasNeue.otf') format('opentype');
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .sidebar {
+    width: 380px; min-width: 380px;
+    background: #16213e;
+    padding: 24px; overflow-y: auto;
+    border-right: 1px solid #0f3460;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .sidebar h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 2px;
+    color: #e94560; text-align: center;
+  }
+  .sidebar h1 span { color: #f5c518; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 1px; color: #8899aa; font-weight: 600;
+  }
+  .field input[type="text"], .field input:not([type]), .field textarea {
+    background: #0f3460; border: 1px solid #1a4a7a;
+    color: #fff; padding: 10px 12px; border-radius: 6px;
+    font-size: 0.95rem; font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px; transition: border 0.2s;
+  }
+  .field input[type="text"]:focus, .field input:not([type]):focus, .field textarea:focus {
+    outline: none; border-color: #e94560;
+  }
+  .field input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 6px;
+    background: #0f3460; border-radius: 3px; outline: none; cursor: pointer; padding: 0; border: none;
+  }
+  .field input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px;
+    background: #e94560; border-radius: 50%; cursor: pointer;
+  }
+  .field input[type="file"] {
+    padding: 8px; font-family: 'Segoe UI', sans-serif; letter-spacing: 0; cursor: pointer;
+  }
+  .field input[type="file"]::file-selector-button {
+    background: #e94560; border: none; color: #fff;
+    padding: 6px 14px; border-radius: 4px; cursor: pointer; margin-right: 10px; font-weight: 600;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+    letter-spacing: 2px; color: #f5c518;
+    border-bottom: 2px solid #0f3460; padding-bottom: 4px;
+  }
+  .btn {
+    background: #e94560; color: #fff; border: none; padding: 12px;
+    border-radius: 6px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 1px; transition: background 0.2s;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+  }
+  .btn:hover { background: #c73650; }
+  .btn.secondary { background: #0f3460; }
+  .btn.secondary:hover { background: #1a4a7a; }
+  .info-row { display: flex; gap: 10px; }
+  .info-row .field { flex: 1; }
+
+  /* Active slot indicator */
+  #activeSlotLabel {
+    background: #0f3460; padding: 8px 12px; border-radius: 6px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem;
+    letter-spacing: 1px; text-align: center; color: #f5c518;
+  }
+  #activeSlotLabel .hint { color: #8899aa; font-size: 0.7rem; display: block; letter-spacing: 0; }
+
+  /* ── Preview ── */
+  .preview {
+    flex: 1; display: flex; flex-direction: column; background: #1a1a2e;
+  }
+  .tabs { display: flex; gap: 2px; padding: 16px 16px 0; }
+  .tab {
+    padding: 10px 24px; background: #0f3460; border: none;
+    color: #8899aa; cursor: pointer; font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 2px; border-radius: 6px 6px 0 0; transition: all 0.2s;
+  }
+  .tab.active { background: #e94560; color: #fff; }
+  .tab:hover:not(.active) { background: #1a4a7a; color: #ccc; }
+  .canvas-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 16px; overflow: auto; position: relative;
+  }
+  canvas { max-height: 100%; max-width: 100%; border-radius: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h1><span>POP!</span> BOX CUSTOMISER</h1>
+
+  <div class="section-title">🎨 Main Character</div>
+  <div class="field">
+    <label>Character Image</label>
+    <input type="file" id="charImage" accept="image/*">
+  </div>
+  <div class="info-row" style="align-items:end">
+    <div class="field" style="flex:2">
+      <label>Background Removal</label>
+      <select id="bgMode" style="background:#0f3460;border:1px solid #1a4a7a;color:#fff;padding:10px;border-radius:6px;font-size:0.9rem;cursor:pointer">
+        <option value="none">None — keep original</option>
+        <option value="auto" selected>Auto-detect background</option>
+        <option value="white">Remove white background</option>
+        <option value="black">Remove black background</option>
+        <option value="green">Remove green screen</option>
+      </select>
+    </div>
+    <div class="field" style="flex:1">
+      <label>Tolerance</label>
+      <input type="range" id="bgTolerance" min="10" max="120" value="50" step="5">
+    </div>
+    <div class="field" style="flex:1">
+      <label>Stroke <span id="strokeVal">15px</span></label>
+      <input type="range" id="bgStroke" min="0" max="40" value="15" step="1">
+    </div>
+  </div>
+  <button class="btn secondary" onclick="reprocessImage()" style="font-size:0.8rem;margin-top:4px">🔄 Re-process with current settings</button>
+  <div class="info-row">
+    <div class="field">
+      <label>Franchise Name</label>
+      <input type="text" id="franchiseName" placeholder="FRANCHISE NAME" maxlength="30">
+    </div>
+    <div class="field">
+      <label>Number</label>
+      <input type="text" id="charNumber" placeholder="33" maxlength="4" style="text-align:center">
+    </div>
+  </div>
+  <div class="field">
+    <label>Character Name</label>
+    <input type="text" id="charName" placeholder="CHARACTER NAME" maxlength="30">
+  </div>
+
+  <!-- Active slot crop controls -->
+  <div id="cropPanel" style="display:none">
+    <div class="section-title">✂️ Image Adjust</div>
+    <div id="activeSlotLabel"><span id="slotName">—</span><span class="hint">Click an image area on the preview</span></div>
+    <div class="field">
+      <label>Zoom <span id="zoomVal">100%</span></label>
+      <input type="range" id="cropZoom" min="50" max="400" value="100" step="5">
+    </div>
+    <div class="info-row">
+      <div class="field"><label>Pos X</label><input type="range" id="cropPosX" min="-100" max="100" value="0" step="1"></div>
+      <div class="field"><label>Pos Y</label><input type="range" id="cropPosY" min="-100" max="100" value="0" step="1"></div>
+    </div>
+    <small style="color:#8899aa;font-size:0.7rem">💡 Drag corners = zoom &nbsp;|&nbsp; Drag center = pan &nbsp;|&nbsp; Scroll = zoom</small>
+    <button class="btn secondary" onclick="resetActiveSlot()" style="margin-top:8px;font-size:0.9rem">↺ Reset This Image</button>
+  </div>
+
+  <div class="section-title">🎨 Box Colors</div>
+  <div class="info-row">
+    <div class="field">
+      <label>Bar / Background</label>
+      <input type="color" id="barColor" value="#0b2f4e">
+    </div>
+    <div class="field">
+      <label>Number Circle</label>
+      <input type="color" id="circleColor" value="#0b2f4e">
+    </div>
+  </div>
+
+  <div class="section-title">💾 Presets</div>
+  <button class="btn" onclick="saveAsDefault()" style="font-size:0.9rem;background:#f5c518;color:#1a1a2e">💾 Save Current as Default</button>
+  <button class="btn secondary" onclick="applyDefaults()" style="font-size:0.9rem">🔄 Apply Defaults to All</button>
+  <small style="color:#8899aa;font-size:0.7rem;text-align:center;display:block">Defaults are auto-applied when you load a new image</small>
+
+  <div class="section-title">👥 Other Characters (Back) <button onclick="addOtherChar()" style="background:#e94560;color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:16px;line-height:1;float:right">+</button></div>
+  <div id="otherCharsContainer"></div>
+  <div class="field"><label>Bottom Text</label><input type="text" id="bottomText" value="THIS COOL CUSTOM WAS CREATED BY YOU!" maxlength="50"></div>
+
+  <button class="btn" onclick="downloadAll()">⬇ Download All Panels (PNG)</button>
+  <button class="btn secondary" onclick="downloadActive()">⬇ Download This Panel</button>
+</div>
+
+<div class="preview">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('front')">FRONT</button>
+    <button class="tab" onclick="switchTab('back')">BACK</button>
+    <button class="tab" onclick="switchTab('side')">SIDE</button>
+  </div>
+  <div class="canvas-wrap"><canvas id="previewCanvas"></canvas></div>
+</div>
+
+<script>
+// ═══════════ TEMPLATES ═══════════
+const TEMPLATES = { front:'templates/front_clean.png', back:'templates/back_clean.png', side:'templates/side_clean.png' };
+
+// ═══════════ LAYOUT — All image slots ═══════════
+// Each slot: { panel, key, spec:{x,y,w,h} }
+const SLOTS = {
+  // Front panel
+  charFront:  { panel:'front', key:'char', spec:{x:78,  y:2078, w:537, h:1084}, label:'Front Window' },
+  charTop:    { panel:'front', key:'char', spec:{x:307, y:891,  w:708, h:386},  label:'Top Panel' },
+  charSideF:  { panel:'front', key:'char', spec:{x:1417,y:2841, w:643, h:319},  label:'Right Side' },
+  // Back panel
+  charBack:   { panel:'back',  key:'char', spec:{x:592, y:847,  w:366, h:994},  label:'Back Character' },
+  charBottom: { panel:'back',  key:'char', spec:{x:603, y:2219, w:548, h:439},  label:'Bottom Panel' },
+  // Side panel
+  charSideP:  { panel:'side',  key:'char', spec:{x:903, y:1348, w:599, h:838},  label:'Side Character' },
+};
+
+// ═══════════ DYNAMIC OTHER CHARACTERS ═══════════
+let otherChars = []; // {id, name, number, imageKey}
+let otherCharIdCounter = 0;
+
+function addOtherChar() {
+  const id = otherCharIdCounter++;
+  otherChars.push({ id, name: '', number: '', imageKey: 'other_' + id });
+  renderOtherChars();
+  draw();
+}
+
+function removeOtherChar(id) {
+  const idx = otherChars.findIndex(c => c.id === id);
+  if (idx === -1) return;
+  const imageKey = otherChars[idx].imageKey;
+  delete loadedImages[imageKey];
+  delete cropStates['other_' + id];
+  otherChars.splice(idx, 1);
+  renderOtherChars();
+  draw();
+}
+
+function renderOtherChars() {
+  const container = document.getElementById('otherCharsContainer');
+  container.innerHTML = otherChars.map((c, i) => `
+    <div style="border:1px solid #0f3460;border-radius:6px;padding:8px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="color:#f5c518;font-family:'Bebas Neue',sans-serif;font-size:0.9rem">#${i+1}</span>
+        <button onclick="removeOtherChar(${c.id})" style="background:none;border:none;color:#e94560;cursor:pointer;font-size:18px">&times;</button>
+      </div>
+      <div class="info-row">
+        <div class="field"><input type="text" id="oc_name_${c.id}" placeholder="NAME" maxlength="25" value="${c.name}" oninput="updateOtherChar(${c.id})"></div>
+        <div class="field"><input type="text" id="oc_num_${c.id}" placeholder="##" maxlength="3" value="${c.number}" style="text-align:center;width:50px" oninput="updateOtherChar(${c.id})"></div>
+      </div>
+      <div class="field"><input type="file" id="oc_img_${c.id}" accept="image/*" onchange="uploadOtherImage(${c.id}, this)"></div>
+    </div>
+  `).join('');
+}
+
+function updateOtherChar(id) {
+  const c = otherChars.find(c => c.id === id);
+  if (!c) return;
+  c.name = document.getElementById('oc_name_' + id)?.value || '';
+  c.number = document.getElementById('oc_num_' + id)?.value || '';
+  draw();
+  autoSave();
+}
+
+function uploadOtherImage(id, input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const c = otherChars.find(c => c.id === id);
+  if (!c) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      loadedImages[c.imageKey] = img;
+      draw();
+      autoSave();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function getOtherCharSlots() {
+  // Generate slots for each other character, distributed horizontally
+  const slots = {};
+  const startX = 1067;
+  const maxW = 698; // available width (1067 to 1765)
+  const count = otherChars.length || 0;
+  if (count === 0) return slots;
+  const gap = 10;
+  const slotW = Math.min(263, (maxW - gap * (count - 1)) / count);
+  const slotH = 377;
+  const y = 1322;
+  otherChars.forEach((c, i) => {
+    slots['other_' + c.id] = {
+      panel: 'back',
+      key: c.imageKey,
+      spec: { x: startX + i * (slotW + gap), y, w: slotW, h: slotH },
+      label: c.name || 'Other #' + (i+1)
+    };
+  });
+  return slots;
+}
+
+// ═══════════ STATE ═══════════
+let currentTab = 'front';
+const loadedTemplates = {};
+const loadedImages = {};
+// Each slot gets independent crop state: {zoom:100, posX:0, posY:0}
+const cropStates = {};
+let activeSlot = null; // slot id
+let dragging = null; // {slot, type:'pan'|'corner', corner:'tl'|'tr'|'bl'|'br', startX, startY, startZoom, startPosX, startPosY}
+
+// ═══════════ LOAD TEMPLATES ═══════════
+Object.entries(TEMPLATES).forEach(([key, src]) => {
+  const img = new Image();
+  img.src = src;
+  img.onload = () => { loadedTemplates[key] = img; draw(); };
+});
+
+// ═══════════ BACKGROUND REMOVAL + STROKE ═══════════
+let _originalImage = null;
+
+function removeBackground(sourceImg, mode, tolerance, strokePx) {
+  console.log('removeBackground:', mode, 'tolerance:', tolerance, 'stroke:', strokePx+'px');
+  const W = sourceImg.width, H = sourceImg.height;
+
+  // Draw to canvas
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(sourceImg, 0, 0);
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const data = imgData.data;
+
+  // Determine background color
+  let bgR = 255, bgG = 255, bgB = 255;
+  if (mode === 'white') { bgR=255; bgG=255; bgB=255; }
+  else if (mode === 'black') { bgR=0; bgG=0; bgB=0; }
+  else if (mode === 'green') { bgR=0; bgG=255; bgB=0; }
+  else if (mode === 'auto') {
+    let sr=0,sg=0,sb=0,sc=0;
+    const corners=[[0,0],[W-5,0],[0,H-5],[W-5,H-5]];
+    for (const [cx,cy] of corners) {
+      for (let y=cy; y<cy+5 && y<H; y++)
+        for (let x=cx; x<cx+5 && x<W; x++) {
+          const i=(y*W+x)*4; sr+=data[i]; sg+=data[i+1]; sb+=data[i+2]; sc++;
+        }
+    }
+    bgR=Math.round(sr/sc); bgG=Math.round(sg/sc); bgB=Math.round(sb/sc);
+  }
+  console.log('  BG color:', `rgb(${bgR},${bgG},${bgB})`);
+
+  // Build binary mask (true = foreground)
+  const t2 = tolerance * tolerance;
+  const mask = new Uint8Array(W * H);
+  let fgCount = 0, minX=W, minY=H, maxX=0, maxY=0;
+
+  for (let y=0; y<H; y++) {
+    for (let x=0; x<W; x++) {
+      const i = (y*W + x)*4;
+      const dr=data[i]-bgR, dg=data[i+1]-bgG, db=data[i+2]-bgB;
+      if (dr*dr + dg*dg + db*db > t2) {
+        mask[y*W + x] = 1;
+        fgCount++;
+        if (x<minX) minX=x; if (x>maxX) maxX=x;
+        if (y<minY) minY=y; if (y>maxY) maxY=y;
+      }
+    }
+  }
+  console.log('  Foreground pixels:', fgCount);
+
+  if (fgCount === 0) return Promise.resolve(sourceImg);
+
+  // Dilate mask by strokePx (create the white outline)
+  const dilated = new Uint8Array(W * H);
+  const spx = Math.max(0, strokePx);
+  for (let y=0; y<H; y++) {
+    for (let x=0; x<W; x++) {
+      // Check if any pixel within strokePx radius is foreground
+      let found = false;
+      const r2 = spx * spx;
+      for (let dy=-spx; dy<=spx && !found; dy++) {
+        const ny = y + dy;
+        if (ny < 0 || ny >= H) continue;
+        for (let dx=-spx; dx<=spx && !found; dx++) {
+          const nx = x + dx;
+          if (nx < 0 || nx >= W) continue;
+          if (dx*dx + dy*dy <= r2 && mask[ny*W + nx]) {
+            found = true;
+          }
+        }
+      }
+      if (found) {
+        dilated[y*W + x] = 1;
+        if (x<minX) minX=x; if (x>maxX) maxX=x;
+        if (y<minY) minY=y; if (y>maxY) maxY=y;
+      }
+    }
+  }
+
+  // Crop bbox with a tiny extra margin
+  const M = 2;
+  minX=Math.max(0,minX-M); minY=Math.max(0,minY-M);
+  maxX=Math.min(W,maxX+M); maxY=Math.min(H,maxY+M);
+  const cropW = maxX - minX;
+  const cropH = maxY - minY;
+  console.log('  Crop:', cropW+'x'+cropH, 'stroke:', strokePx+'px');
+
+  // Build output: transparent bg, white stroke, original fg
+  const out = document.createElement('canvas');
+  out.width = cropW; out.height = cropH;
+  const octx = out.getContext('2d');
+  const outData = octx.createImageData(cropW, cropH);
+
+  for (let y=0; y<cropH; y++) {
+    const sy = minY + y;
+    for (let x=0; x<cropW; x++) {
+      const sx = minX + x;
+      const di = (y*cropW + x)*4;
+      const si = (sy*W + sx)*4;
+
+      if (mask[sy*W + sx]) {
+        // Original pixel (foreground)
+        outData.data[di] = data[si];
+        outData.data[di+1] = data[si+1];
+        outData.data[di+2] = data[si+2];
+        outData.data[di+3] = 255;
+      } else if (dilated[sy*W + sx]) {
+        // Stroke pixel (white outline)
+        outData.data[di] = 255;
+        outData.data[di+1] = 255;
+        outData.data[di+2] = 255;
+        outData.data[di+3] = 255;
+      } else {
+        // Transparent
+        outData.data[di+3] = 0;
+      }
+    }
+  }
+  octx.putImageData(outData, 0, 0);
+
+  return new Promise(resolve => {
+    const resultImg = new Image();
+    resultImg.onload = () => resolve(resultImg);
+    resultImg.src = out.toDataURL('image/png');
+  });
+}
+
+async function reprocessImage() {
+  if (!_originalImage) {
+    alert('Load an image first.');
+    return;
+  }
+  const mode = document.getElementById('bgMode').value;
+  const tolerance = parseInt(document.getElementById('bgTolerance').value);
+  const strokePx = parseInt(document.getElementById('bgStroke').value);
+  if (mode === 'none') {
+    loadedImages['char'] = _originalImage;
+  } else {
+    loadedImages['char'] = await removeBackground(_originalImage, mode, tolerance, strokePx);
+  }
+  draw();
+  autoSave();
+}
+
+// ═══════════ UPLOAD HANDLERS ═══════════
+function loadUploadedImage(fileInput, key) {
+  const file = fileInput.files?.[0];
+  if (!file) { delete loadedImages[key]; draw(); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => { loadedImages[key] = img; draw(); };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('charImage').addEventListener('change', async function() {
+  const file = this.files?.[0];
+  if (!file) return;
+  
+  // Load original
+  const origImg = await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+
+  // Store original for reprocessing
+  _originalImage = origImg;
+
+  // Apply background removal if enabled
+  const mode = document.getElementById('bgMode').value;
+  const tolerance = parseInt(document.getElementById('bgTolerance').value);
+  const strokePx = parseInt(document.getElementById('bgStroke').value);
+  
+  if (mode !== 'none') {
+    const processed = await removeBackground(origImg, mode, tolerance, strokePx);
+    loadedImages['char'] = processed;
+  } else {
+    loadedImages['char'] = origImg;
+  }
+
+  document.getElementById('cropPanel').style.display = 'block';
+  draw();
+  setTimeout(autoSave, 500);
+});
+document.getElementById('bgStroke').addEventListener('input', function() {
+  document.getElementById('strokeVal').textContent = this.value + 'px';
+});
+document.getElementById('barColor').addEventListener('input', draw);
+document.getElementById('circleColor').addEventListener('input', draw);
+
+// ═══════════ TEXT INPUTS → REDRAW ═══════════
+['franchiseName','charName','charNumber','bottomText']
+  .forEach(id => document.getElementById(id).addEventListener('input', draw));
+
+// ═══════════ CROP SLIDER HANDLERS ═══════════
+document.getElementById('cropZoom').addEventListener('input', function() {
+  if (!activeSlot) return;
+  cropStates[activeSlot].zoom = parseInt(this.value);
+  document.getElementById('zoomVal').textContent = this.value + '%';
+  draw();
+});
+document.getElementById('cropPosX').addEventListener('input', function() {
+  if (!activeSlot) return;
+  cropStates[activeSlot].posX = parseInt(this.value);
+  draw();
+});
+document.getElementById('cropPosY').addEventListener('input', function() {
+  if (!activeSlot) return;
+  cropStates[activeSlot].posY = parseInt(this.value);
+  draw();
+});
+
+// ═══════════ TAB SWITCHING ═══════════
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['front','back','side'][i] === tab);
+  });
+  // Deselect slot when switching tabs
+  activeSlot = null;
+  updateCropUI();
+  draw();
+}
+
+// ═══════════ ACTIVE SLOT ═══════════
+function setActiveSlot(slotId) {
+  activeSlot = slotId;
+  updateCropUI();
+  draw();
+}
+
+function resetActiveSlot() {
+  if (!activeSlot) return;
+  cropStates[activeSlot] = { zoom: 100, posX: 0, posY: 0 };
+  updateCropUI();
+  draw();
+}
+
+function getCropState(slotId) {
+  if (!cropStates[slotId]) {
+    // Use saved defaults if available, otherwise fresh
+    const defaults = loadDefaults();
+    cropStates[slotId] = defaults[slotId] || { zoom: 100, posX: 0, posY: 0 };
+  }
+  return cropStates[slotId];
+}
+
+// ── Defaults management ──
+const DEFAULTS_KEY = 'popbox_defaults';
+
+function loadDefaults() {
+  try { return JSON.parse(localStorage.getItem(DEFAULTS_KEY)) || {}; } catch(e) { return {}; }
+}
+
+function saveAsDefault() {
+  // Deep-clone current crop states for all slots that have been touched
+  const defaults = loadDefaults();
+  for (const [slotId, cs] of Object.entries(cropStates)) {
+    defaults[slotId] = { ...cs };
+  }
+  localStorage.setItem(DEFAULTS_KEY, JSON.stringify(defaults));
+  // Flash feedback
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  btn.style.background = '#2ecc71';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = '#f5c518'; }, 1500);
+}
+
+function applyDefaults() {
+  const defaults = loadDefaults();
+  if (Object.keys(defaults).length === 0) {
+    alert('No defaults saved yet. Adjust images first, then click "Save Current as Default".');
+    return;
+  }
+  for (const [slotId, def] of Object.entries(defaults)) {
+    cropStates[slotId] = { ...def };
+  }
+  updateCropUI();
+  draw();
+  autoSave();
+}
+
+function getSlotById(id) {
+  return SLOTS[id] || getOtherCharSlots()[id];
+}
+
+function updateCropUI() {
+  const panel = document.getElementById('cropPanel');
+  if (!activeSlot) {
+    document.getElementById('slotName').textContent = '—';
+    document.getElementById('activeSlotLabel').querySelector('.hint').textContent = 'Click an image area on the preview';
+    document.getElementById('cropZoom').value = 100;
+    document.getElementById('cropPosX').value = 0;
+    document.getElementById('cropPosY').value = 0;
+    document.getElementById('zoomVal').textContent = '100%';
+    return;
+  }
+  const cs = getCropState(activeSlot);
+  const slot = getSlotById(activeSlot);
+  document.getElementById('slotName').textContent = slot.label;
+  document.getElementById('activeSlotLabel').querySelector('.hint').textContent = '';
+  document.getElementById('cropZoom').value = cs.zoom;
+  document.getElementById('cropPosX').value = cs.posX;
+  document.getElementById('cropPosY').value = cs.posY;
+  document.getElementById('zoomVal').textContent = cs.zoom + '%';
+}
+
+// ═══════════ DRAWING ═══════════
+function draw() {
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
+  const template = loadedTemplates[currentTab];
+  if (!template) return;
+
+  const scale = Math.min(
+    canvas.parentElement.clientWidth / template.width,
+    canvas.parentElement.clientHeight / template.height, 1
+  );
+  canvas.width = template.width * scale;
+  canvas.height = template.height * scale;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
+
+  // Store scale for hit testing
+  canvas._scale = scale;
+  canvas._templateW = template.width;
+  canvas._templateH = template.height;
+
+  ctx.save();
+  ctx.scale(scale, scale);
+
+  // ── Box color overlay ──
+  const barColor = document.getElementById('barColor').value;
+  const circleColor = document.getElementById('circleColor').value;
+  ctx.save();
+  ctx.globalCompositeOperation = 'color';
+  if (currentTab === 'front') {
+    // Cover entire front panel area with bar color (only affects colored pixels)
+    ctx.fillStyle = barColor;
+    ctx.fillRect(78, 1391, 1223, 1708);
+    // Then punch the circles with circle color
+    ctx.fillStyle = circleColor;
+    ctx.beginPath(); ctx.arc(1183, 1520, 110, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(2250, 2992, 120, 0, Math.PI*2); ctx.fill();
+  }
+  if (currentTab === 'back') {
+    ctx.fillStyle = barColor;
+    ctx.fillRect(590, 389, 1175, 1667);
+    ctx.fillStyle = circleColor;
+    ctx.beginPath(); ctx.arc(1620, 1052, 87, 0, Math.PI*2); ctx.fill();
+  }
+  if (currentTab === 'side') {
+    ctx.fillStyle = barColor;
+    ctx.fillRect(740, 867, 919, 1665);
+    ctx.fillStyle = circleColor;
+    ctx.beginPath(); ctx.arc(1196, 2414, 92, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+
+  // Get text values
+  const vals = {
+    franchise: document.getElementById('franchiseName').value.toUpperCase(),
+    charName: document.getElementById('charName').value.toUpperCase(),
+    number: document.getElementById('charNumber').value,
+    bottomText: document.getElementById('bottomText').value.toUpperCase(),
+  };
+
+  // ── Draw all image slots for current panel ──
+  const allSlots = { ...SLOTS, ...getOtherCharSlots() };
+  for (const [slotId, slot] of Object.entries(allSlots)) {
+    if (slot.panel !== currentTab) continue;
+    const img = loadedImages[slot.key];
+    if (!img) continue;
+    const cs = getCropState(slotId);
+    const s = slot.spec;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(s.x, s.y, s.w, s.h);
+    ctx.clip();
+
+    const baseScale = Math.min(s.w / img.width, s.h / img.height);
+    const zoomFactor = cs.zoom / 100;
+    const sc = baseScale * zoomFactor;
+    const dw = img.width * sc;
+    const dh = img.height * sc;
+    const overflowX = dw - s.w;
+    const overflowY = dh - s.h;
+    const dx = s.x - (overflowX/2) + (overflowX/2)*(cs.posX/100);
+    const dy = s.y - (overflowY/2) + (overflowY/2)*(cs.posY/100);
+    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.restore();
+
+    // Draw handles if this slot is active
+    if (slotId === activeSlot) {
+      const hw = 8;
+      ctx.fillStyle = '#e94560';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      // Border
+      ctx.strokeRect(s.x + 1, s.y + 1, s.w - 2, s.h - 2);
+      // Corner handles
+      [[s.x, s.y], [s.x+s.w-hw, s.y], [s.x, s.y+s.h-hw], [s.x+s.w-hw, s.y+s.h-hw]].forEach(([hx, hy]) => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(hx, hy, hw, hw);
+        ctx.strokeStyle = '#e94560';
+        ctx.strokeRect(hx, hy, hw, hw);
+      });
+    }
+  }
+
+  // ── Draw text ──
+  function drawText(text, spec, fontSize, color, vertical) {
+    if (!text) return;
+    ctx.save();
+    ctx.font = `bold ${fontSize||52}px "Bebas Neue", "Impact", sans-serif`;
+    ctx.fillStyle = color || '#ffffff';
+    ctx.textBaseline = 'middle';
+    if (vertical) {
+      ctx.translate(spec.x + spec.w/2, spec.y + spec.h/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.textAlign = 'center';
+      ctx.fillText(text, 0, 0);
+    } else if (spec.align === 'center') {
+      ctx.textAlign = 'center';
+      ctx.fillText(text, spec.x + spec.w/2, spec.y + spec.h/2);
+    } else {
+      ctx.textAlign = 'left';
+      ctx.fillText(text, spec.x, spec.y + spec.h/2);
+    }
+    ctx.restore();
+  }
+
+  if (currentTab === 'front') {
+    drawText(vals.franchise, {x:633,y:1431,w:358,h:178,align:'center'}, 62);
+    drawText(vals.charName, {x:566,y:2879,w:646,h:86,align:'center'}, 52);
+    drawText(vals.number, {x:1112,y:1452,w:145,h:143,align:'center'}, 72);
+    drawText(vals.number, {x:2179,y:2920,w:144,h:144,align:'center'}, 72);
+    drawText(vals.charName, {x:2171,y:1529,w:183,h:1180,align:'center'}, 48, '#ffffff', true);
+    drawText('VINYL BOBBLE-HEAD', {x:661,y:2992,w:461,h:55,align:'center'}, 28, '#cccccc');
+  }
+  if (currentTab === 'back') {
+    drawText(vals.franchise, {x:1185,y:458,w:493,h:254,align:'center'}, 56);
+    drawText(vals.charName, {x:1122,y:848,w:587,h:80,align:'center'}, 46);
+    drawText(vals.number, {x:1561,y:995,w:122,h:121,align:'center'}, 56);
+    // Dynamic other chars
+    otherChars.forEach((c, i) => {
+      const slot = getOtherCharSlots()['other_' + c.id];
+      if (!slot) return;
+      const s = slot.spec;
+      const sx = s.x + s.w/2;
+      drawText(c.name.toUpperCase(), {x: sx - 120, y:1725, w:240, h:110, align:'center'}, 28);
+      drawText(c.number, {x: sx + s.w/2 - 22, y:1265, w:44, h:43, align:'center'}, 22);
+    });
+    drawText(vals.bottomText, {x:1154,y:2272,w:536,h:464,align:'center'}, 24);
+  }
+  if (currentTab === 'side') {
+    drawText(vals.charName, {x:955,y:2221,w:491,h:70,align:'center'}, 38);
+    drawText(vals.number, {x:1135,y:2355,w:124,h:122,align:'center'}, 52);
+  }
+
+  ctx.restore();
+}
+
+// ═══════════ CANVAS INTERACTION (Photoshop-style) ═══════════
+const canvas = document.getElementById('previewCanvas');
+
+function getSlotAt(mx, my) {
+  const allSlots = { ...SLOTS, ...getOtherCharSlots() };
+  const slots = Object.entries(allSlots).filter(([_, s]) => s.panel === currentTab && loadedImages[s.key]);
+  // Check from last drawn (topmost) to first
+  for (let i = slots.length - 1; i >= 0; i--) {
+    const [id, slot] = slots[i];
+    const s = slot.spec;
+    if (mx >= s.x && mx <= s.x + s.w && my >= s.y && my <= s.y + s.h) return id;
+  }
+  return null;
+}
+
+function getCornerAt(mx, my, slotId) {
+  const slot = getSlotById(slotId);
+  if (!slot) return null;
+  const s = slot.spec;
+  const hw = 10; // hit area for corners
+  const corners = {
+    tl: [s.x, s.y],
+    tr: [s.x + s.w, s.y],
+    bl: [s.x, s.y + s.h],
+    br: [s.x + s.w, s.y + s.h],
+  };
+  for (const [name, [cx, cy]] of Object.entries(corners)) {
+    if (mx >= cx - hw && mx <= cx + hw && my >= cy - hw && my <= cy + hw) return name;
+  }
+  return null;
+}
+
+canvas.addEventListener('mousedown', function(e) {
+  const scale = canvas._scale;
+  if (!scale) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / scale;
+  const my = (e.clientY - rect.top) / scale;
+
+  // Check if clicking on active slot's corner
+  if (activeSlot) {
+    const corner = getCornerAt(mx, my, activeSlot);
+    if (corner) {
+      const cs = getCropState(activeSlot);
+      dragging = { slot: activeSlot, type: 'corner', corner, startX: e.clientX, startY: e.clientY, startZoom: cs.zoom };
+      canvas.style.cursor = 'nesw-resize';
+      e.preventDefault();
+      return;
+    }
+  }
+
+  // Check if clicking on any slot
+  const slotId = getSlotAt(mx, my);
+  if (slotId) {
+    setActiveSlot(slotId);
+    const cs = getCropState(slotId);
+    dragging = { slot: slotId, type: 'pan', startX: e.clientX, startY: e.clientY, startPosX: cs.posX, startPosY: cs.posY };
+    canvas.style.cursor = 'grabbing';
+    e.preventDefault();
+    return;
+  }
+
+  // Clicked empty space → deselect
+  activeSlot = null;
+  updateCropUI();
+  draw();
+});
+
+canvas.addEventListener('mousemove', function(e) {
+  const scale = canvas._scale;
+  if (!scale) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / scale;
+  const my = (e.clientY - rect.top) / scale;
+
+  if (dragging) {
+    const dx = e.clientX - dragging.startX;
+    const dy = e.clientY - dragging.startY;
+    const cs = getCropState(dragging.slot);
+
+    if (dragging.type === 'pan') {
+      // Convert pixel delta to percentage of overflow
+      const slot = getSlotById(dragging.slot);
+      const img = loadedImages[slot.key];
+      const s = slot.spec;
+      const baseScale = Math.min(s.w / img.width, s.h / img.height);
+      const zoomFactor = cs.zoom / 100;
+      const dw = img.width * baseScale * zoomFactor;
+      const dh = img.height * baseScale * zoomFactor;
+      const overflowX = dw - s.w;
+      const overflowY = dh - s.h;
+      const pxDelta = overflowX > 0 ? (dx / scale / overflowX) * 100 : 0;
+      const pyDelta = overflowY > 0 ? (dy / scale / overflowY) * 100 : 0;
+      cs.posX = Math.min(100, Math.max(-100, dragging.startPosX + pxDelta));
+      cs.posY = Math.min(100, Math.max(-100, dragging.startPosY + pyDelta));
+    } else if (dragging.type === 'corner') {
+      // Diagonal drag → zoom. Pull away = zoom out, pull towards center = zoom in
+      const slot = getSlotById(dragging.slot);
+      const s = slot.spec;
+      const cx = s.x + s.w / 2;
+      const cy = s.y + s.h / 2;
+      const startDist = Math.hypot(dragging.startX / scale - cx, dragging.startY / scale - cy);
+      const currDist = Math.hypot((dragging.startX + dx) / scale - cx, (dragging.startY + dy) / scale - cy);
+      const ratio = currDist / (startDist || 1);
+      cs.zoom = Math.min(400, Math.max(50, Math.round(dragging.startZoom * ratio)));
+    }
+
+    updateCropUI();
+    draw();
+  } else {
+    // Hover cursor
+    const hoverSlot = getSlotAt(mx, my);
+    if (hoverSlot && hoverSlot === activeSlot) {
+      const corner = getCornerAt(mx, my, activeSlot);
+      if (corner) {
+        canvas.style.cursor = (corner === 'tl' || corner === 'br') ? 'nwse-resize' : 'nesw-resize';
+      } else {
+        canvas.style.cursor = 'grab';
+      }
+    } else if (hoverSlot) {
+      canvas.style.cursor = 'pointer';
+    } else {
+      canvas.style.cursor = 'default';
+    }
+  }
+});
+
+canvas.addEventListener('mouseup', stopDrag);
+canvas.addEventListener('mouseleave', stopDrag);
+
+function stopDrag() {
+  dragging = null;
+  canvas.style.cursor = 'default';
+}
+
+// ═══════════ SCROLL WHEEL ZOOM ═══════════
+canvas.addEventListener('wheel', function(e) {
+  const scale = canvas._scale;
+  if (!scale) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / scale;
+  const my = (e.clientY - rect.top) / scale;
+  const slotId = getSlotAt(mx, my);
+  if (!slotId) return;
+  setActiveSlot(slotId);
+  const cs = getCropState(slotId);
+  const delta = e.deltaY > 0 ? -10 : 10;
+  cs.zoom = Math.min(400, Math.max(50, cs.zoom + delta));
+  updateCropUI();
+  draw();
+  e.preventDefault();
+}, { passive: false });
+
+// ═══════════ ROBUST POINTER INTERACTION ═══════════
+// Uses the canvas' displayed size rather than the internal preview scale.
+function pointerToTemplate(e) {
+  const rect = canvas.getBoundingClientRect();
+  const template = loadedTemplates[currentTab];
+  if (!template || rect.width <= 0 || rect.height <= 0) return null;
+  return {
+    x: (e.clientX - rect.left) * (template.width / rect.width),
+    y: (e.clientY - rect.top) * (template.height / rect.height),
+    rect
+  };
+}
+
+let pointerDrag = null;
+
+canvas.addEventListener('pointerdown', function(e) {
+  const point = pointerToTemplate(e);
+  if (!point) return;
+
+  if (activeSlot) {
+    const corner = getCornerAt(point.x, point.y, activeSlot);
+    if (corner) {
+      const cs = getCropState(activeSlot);
+      pointerDrag = {
+        slot: activeSlot,
+        type: 'resize',
+        startX: e.clientX,
+        startY: e.clientY,
+        startZoom: cs.zoom
+      };
+      canvas.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return;
+    }
+  }
+
+  const slotId = getSlotAt(point.x, point.y);
+  if (!slotId) return;
+
+  setActiveSlot(slotId);
+  document.getElementById('cropPanel').style.display = 'block';
+  const cs = getCropState(slotId);
+  pointerDrag = {
+    slot: slotId,
+    type: 'pan',
+    startX: e.clientX,
+    startY: e.clientY,
+    startPosX: cs.posX,
+    startPosY: cs.posY
+  };
+  canvas.setPointerCapture?.(e.pointerId);
+  canvas.style.cursor = 'grabbing';
+  e.preventDefault();
+  e.stopImmediatePropagation();
+}, true);
+
+canvas.addEventListener('pointermove', function(e) {
+  if (!pointerDrag) return;
+  const point = pointerToTemplate(e);
+  const slot = getSlotById(pointerDrag.slot);
+  const img = slot ? loadedImages[slot.key] : null;
+  if (!point || !slot || !img) return;
+
+  const cs = getCropState(pointerDrag.slot);
+  if (pointerDrag.type === 'pan') {
+    const dx = (e.clientX - pointerDrag.startX) * (loadedTemplates[currentTab].width / point.rect.width);
+    const dy = (e.clientY - pointerDrag.startY) * (loadedTemplates[currentTab].height / point.rect.height);
+    const s = slot.spec;
+    const baseScale = Math.min(s.w / img.width, s.h / img.height);
+    const dw = img.width * baseScale * (cs.zoom / 100);
+    const dh = img.height * baseScale * (cs.zoom / 100);
+    cs.posX = Math.min(100, Math.max(-100, pointerDrag.startPosX + dx / Math.max(1, dw - s.w) * 100));
+    cs.posY = Math.min(100, Math.max(-100, pointerDrag.startPosY + dy / Math.max(1, dh - s.h) * 100));
+  } else {
+    const delta = (e.clientX - pointerDrag.startX) + (e.clientY - pointerDrag.startY);
+    cs.zoom = Math.min(400, Math.max(50, Math.round(pointerDrag.startZoom + delta)));
+  }
+
+  updateCropUI();
+  draw();
+  e.preventDefault();
+  e.stopImmediatePropagation();
+}, true);
+
+function stopRobustPointer(e) {
+  if (!pointerDrag) return;
+  pointerDrag = null;
+  try { canvas.releasePointerCapture?.(e.pointerId); } catch (_) {}
+  canvas.style.cursor = 'default';
+  autoSave();
+  e.preventDefault();
+  e.stopImmediatePropagation();
+}
+
+canvas.addEventListener('pointerup', stopRobustPointer, true);
+canvas.addEventListener('pointercancel', stopRobustPointer, true);
+
+// ═══════════ DOWNLOAD ═══════════
+function downloadCanvas(panel) {
+  return new Promise(resolve => {
+    const offCanvas = document.createElement('canvas');
+    const template = loadedTemplates[panel];
+    if (!template) { resolve(null); return; }
+    offCanvas.width = template.width;
+    offCanvas.height = template.height;
+    const ctx = offCanvas.getContext('2d');
+    ctx.drawImage(template, 0, 0);
+
+    // Draw images
+    const allSlots = { ...SLOTS, ...getOtherCharSlots() };
+    for (const [slotId, slot] of Object.entries(allSlots)) {
+      if (slot.panel !== panel) continue;
+      const img = loadedImages[slot.key];
+      if (!img) continue;
+      const cs = getCropState(slotId);
+      const s = slot.spec;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(s.x, s.y, s.w, s.h); ctx.clip();
+      const baseScale = Math.min(s.w / img.width, s.h / img.height);
+      const sc = baseScale * (cs.zoom/100);
+      const dw = img.width * sc, dh = img.height * sc;
+      const ox = dw - s.w, oy = dh - s.h;
+      ctx.drawImage(img, s.x - ox/2 + (ox/2)*(cs.posX/100), s.y - oy/2 + (oy/2)*(cs.posY/100), dw, dh);
+      ctx.restore();
+    }
+
+    // Draw text
+    const vals = {
+      franchise: document.getElementById('franchiseName').value.toUpperCase(),
+      charName: document.getElementById('charName').value.toUpperCase(),
+      number: document.getElementById('charNumber').value,
+      bottomText: document.getElementById('bottomText').value.toUpperCase(),
+    };
+    function dText(text, spec, fs, color, vert) {
+      if (!text) return;
+      ctx.font = `bold ${fs||52}px "Bebas Neue", "Impact", sans-serif`;
+      ctx.fillStyle = color || '#ffffff';
+      ctx.textBaseline = 'middle';
+      if (vert) { ctx.save(); ctx.translate(spec.x+spec.w/2,spec.y+spec.h/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.fillText(text,0,0); ctx.restore(); }
+      else if (spec.align==='center') { ctx.textAlign='center'; ctx.fillText(text,spec.x+spec.w/2,spec.y+spec.h/2); }
+      else { ctx.textAlign='left'; ctx.fillText(text,spec.x,spec.y+spec.h/2); }
+    }
+    if (panel==='front') {
+      dText(vals.franchise,{x:633,y:1431,w:358,h:178,align:'center'},62);
+      dText(vals.charName,{x:566,y:2879,w:646,h:86,align:'center'},52);
+      dText(vals.number,{x:1112,y:1452,w:145,h:143,align:'center'},72);
+      dText(vals.number,{x:2179,y:2920,w:144,h:144,align:'center'},72);
+      dText(vals.charName,{x:2171,y:1529,w:183,h:1180,align:'center'},48,'#ffffff',true);
+      dText('VINYL BOBBLE-HEAD',{x:661,y:2992,w:461,h:55,align:'center'},28,'#cccccc');
+    }
+    if (panel==='back') {
+      dText(vals.franchise,{x:1185,y:458,w:493,h:254,align:'center'},56);
+      dText(vals.charName,{x:1122,y:848,w:587,h:80,align:'center'},46);
+      dText(vals.number,{x:1561,y:995,w:122,h:121,align:'center'},56);
+      otherChars.forEach((c, i) => {
+        const slot = getOtherCharSlots()['other_' + c.id];
+        if (!slot) return;
+        const s = slot.spec;
+        const sx = s.x + s.w/2;
+        dText(c.name.toUpperCase(), {x: sx - 120, y:1725, w:240, h:110, align:'center'}, 28);
+        dText(c.number, {x: sx + s.w/2 - 22, y:1265, w:44, h:43, align:'center'}, 22);
+      });
+      dText(vals.bottomText,{x:1154,y:2272,w:536,h:464,align:'center'},24);
+    }
+    if (panel==='side') {
+      dText(vals.charName,{x:955,y:2221,w:491,h:70,align:'center'},38);
+      dText(vals.number,{x:1135,y:2355,w:124,h:122,align:'center'},52);
+    }
+
+    offCanvas.toBlob(blob => {
+      if (!blob) { resolve(null); return; }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pop_box_${panel}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      resolve({ url, panel });
+    }, 'image/png');
+  });
+}
+
+async function downloadAll() {
+  for (const panel of ['front','back','side']) {
+    const r = await downloadCanvas(panel);
+    if (!r) continue;
+    const a = document.createElement('a');
+    a.href = r.url; a.download = `pop_box_${r.panel}.png`; a.click();
+    setTimeout(() => URL.revokeObjectURL(r.url), 1000);
+  }
+}
+
+async function downloadActive() {
+  const r = await downloadCanvas(currentTab);
+  if (!r) return;
+  const a = document.createElement('a');
+  a.href = r.url; a.download = `pop_box_${r.panel}.png`; a.click();
+  setTimeout(() => URL.revokeObjectURL(r.url), 1000);
+}
+
+window.addEventListener('resize', draw);
+
+// ═══════════ PERSISTENCE (localStorage) ═══════════
+const STORAGE_KEY = 'popbox_state';
+const STATE_VERSION = 2; // bump to clear old corrupted data
+
+function saveState() {
+  const state = {
+    version: STATE_VERSION,
+    texts: {},
+    cropStates: {},
+    images: {},
+  };
+  // Texts
+  ['franchiseName','charName','charNumber','bottomText'].forEach(id => {
+    state.texts[id] = document.getElementById(id).value;
+  });
+  // Crop states
+  state.cropStates = JSON.parse(JSON.stringify(cropStates));
+  // Images (use PNG for transparency, compress dimensions to fit localStorage)
+  for (const [key, img] of Object.entries(loadedImages)) {
+    const c = document.createElement('canvas');
+    c.width = Math.min(img.width, 800);
+    c.height = Math.min(img.height, 800);
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    state.images[key] = c.toDataURL('image/png');
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {
+    // Storage full — clear images and retry
+    state.images = {};
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e2) {}
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    // Clear old/corrupted data
+    if (state.version !== STATE_VERSION) {
+      console.log('Old state version, clearing...');
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(DEFAULTS_KEY);
+      return;
+    }
+    // Restore texts
+    if (state.texts) {
+      for (const [id, val] of Object.entries(state.texts)) {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+      }
+    }
+    // Restore crop states
+    if (state.cropStates) {
+      for (const [slotId, cs] of Object.entries(state.cropStates)) {
+        cropStates[slotId] = cs;
+      }
+      document.getElementById('cropPanel').style.display = Object.keys(state.cropStates).length > 0 ? 'block' : 'none';
+    }
+    // Restore images
+    if (state.images) {
+      let count = 0;
+      for (const [key, dataUrl] of Object.entries(state.images)) {
+        const img = new Image();
+        img.onload = () => {
+          loadedImages[key] = img;
+          count++;
+          if (count === Object.keys(state.images).length) {
+            document.getElementById('cropPanel').style.display = 'block';
+            draw();
+          }
+        };
+        img.src = dataUrl;
+      }
+    }
+  } catch(e) { /* corrupted state, ignore */ }
+}
+
+// Auto-save on any change (debounced)
+let saveTimeout;
+function autoSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveState, 500);
+}
+
+// Hook into all inputs
+['franchiseName','charName','charNumber','bottomText'].forEach(id => {
+  document.getElementById(id).addEventListener('input', autoSave);
+});
+document.getElementById('cropZoom').addEventListener('input', autoSave);
+document.getElementById('cropPosX').addEventListener('input', autoSave);
+document.getElementById('cropPosY').addEventListener('input', autoSave);
+
+// Also save after drag/scroll (hook into stopDrag + wheel)
+const origStopDrag = stopDrag;
+stopDrag = function() {
+  origStopDrag();
+  autoSave();
+};
+canvas.addEventListener('wheel', function(e) {
+  autoSave();
+}, { passive: true });
+
+// Save after image upload
+const origCharImg = document.getElementById('charImage').onchange;
+document.getElementById('charImage').addEventListener('change', function() {
+  setTimeout(autoSave, 1000); // wait for image to load
+});
+// Load saved state on startup
+loadState();
+</script>
+</body>
+</html>
